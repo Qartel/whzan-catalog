@@ -3,8 +3,11 @@ import { useCatalogStore } from '../../../store/catalogStore';
 import { useProducts } from '../../../api/products';
 import CatalogToolbar from '../components/CatalogToolbar';
 import ProductGrid from '../components/ProductGrid';
+import { useCatalogQuerySync } from '../hooks/useCatalogQuerySync';
 
 const CatalogPage = () => {
+  useCatalogQuerySync();
+
   const search = useCatalogStore((s) => s.search);
   const inStockOnly = useCatalogStore((s) => s.inStockOnly);
   const sortBy = useCatalogStore((s) => s.sortBy);
