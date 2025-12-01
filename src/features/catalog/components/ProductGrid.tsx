@@ -49,8 +49,9 @@ const ProductGrid = ({ products, isLoading }: Props) => {
         <Typography variant="h6" mb={1.5}>
           No products found
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Try adjusting your search or filters.
+        <Typography variant="body2" color="text.secondary" mb={0.5}>
+          Try a different search term, remove some filters, or use the quick
+          filters above.
         </Typography>
       </Box>
     );

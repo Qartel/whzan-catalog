@@ -1,4 +1,3 @@
-// src/features/catalog/components/CatalogToolbar.tsx
 import {
   Box,
   TextField,
@@ -28,11 +27,13 @@ const CatalogToolbar = () => {
   const tag = useCatalogStore((s) => s.tag);
   const setTag = useCatalogStore((s) => s.setTag);
   const setPage = useCatalogStore((s) => s.setPage);
+  const setPageSize = useCatalogStore((s) => s.setPageSize);
 
   const handleSortChange = (event: SelectChangeEvent) => {
     const value = event.target.value as string;
     const [field, dir] = value.split(':') as [SortBy, SortDir];
     setSort(field, dir);
+    setPage(1);
   };
 
   const applyQuickTag = (value: string | null) => {
@@ -47,6 +48,15 @@ const CatalogToolbar = () => {
 
   const applyNewest = () => {
     setSort('updatedAt', 'desc');
+    setPage(1);
+  };
+
+  const clearAllFilters = () => {
+    setSearch('');
+    setTag(null);
+    setInStockOnly(false);
+    setSort('updatedAt', 'desc');
+    setPageSize(20);
     setPage(1);
   };
 
@@ -65,6 +75,7 @@ const CatalogToolbar = () => {
         <TextField
           size="small"
           fullWidth
+          label="Search products"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search products by name, tag, or description..."
@@ -74,6 +85,9 @@ const CatalogToolbar = () => {
                 <SearchIcon fontSize="small" />
               </InputAdornment>
             ),
+            inputProps: {
+              'aria-label': 'Search products',
+            },
           }}
         />
 
@@ -121,6 +135,7 @@ const CatalogToolbar = () => {
           flexWrap: 'wrap',
           gap: 1,
           mb: 3,
+          alignItems: 'center',
         }}
       >
         <Button
@@ -153,7 +168,6 @@ const CatalogToolbar = () => {
           Smart home
         </Button>
 
-        {/* Spacer for sort presets */}
         <Box sx={{ flexGrow: 1 }} />
 
         <Button
@@ -169,6 +183,15 @@ const CatalogToolbar = () => {
           onClick={applyNewest}
         >
           Newest
+        </Button>
+
+        <Button
+          size="small"
+          variant="text"
+          onClick={clearAllFilters}
+          sx={{ ml: 1 }}
+        >
+          Clear filters
         </Button>
       </Box>
     </>

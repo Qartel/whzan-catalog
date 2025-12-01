@@ -1,4 +1,3 @@
-// src/features/favorites/components/FavoriteToggle.tsx
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { IconButton, Tooltip } from '@mui/material';
@@ -18,14 +17,15 @@ const FavoriteToggle = ({ productId }: Props) => {
     toggleFavorite(productId);
   };
 
+  const label = isFavorite ? 'Remove from saved items' : 'Save item for later';
+
   return (
-    <Tooltip
-      title={isFavorite ? 'Remove from saved' : 'Save for later'}
-      arrow
-    >
+    <Tooltip title={label} arrow>
       <IconButton
         size="small"
         onClick={handleClick}
+        aria-label={label}
+        aria-pressed={isFavorite}
         sx={{
           bgcolor: 'background.default',
           '&:hover': { bgcolor: 'background.default' },
