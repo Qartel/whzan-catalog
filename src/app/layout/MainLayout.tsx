@@ -62,6 +62,7 @@ const MainLayout = ({ children }: Props) => {
         flexDirection: 'column',
       }}
     >
+      {/* Top app bar */}
       <AppBar
         position="static"
         elevation={0}
@@ -125,13 +126,21 @@ const MainLayout = ({ children }: Props) => {
         </Toolbar>
       </AppBar>
 
-      <Container
-        maxWidth="lg"
-        sx={{ flex: 1, py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}
-      >
-        {children}
-      </Container>
+      {/* Main content area */}
+      <Box component="main" sx={{ flex: 1, py: { xs: 2, sm: 3 } }}>
+        <Container
+          maxWidth={false}
+          sx={{
+            maxWidth: 1200, // roughly 3 large cards + padding
+            mx: 'auto',
+            px: { xs: 2, sm: 3 },
+          }}
+        >
+          {children}
+        </Container>
+      </Box>
 
+      {/* Footer */}
       <Box
         component="footer"
         sx={{
@@ -154,7 +163,7 @@ const MainLayout = ({ children }: Props) => {
             Whzan Catalog Explorer
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Built with React, TypeScript & MUI
+            Built with React, TypeScript &amp; MUI
           </Typography>
         </Container>
       </Box>

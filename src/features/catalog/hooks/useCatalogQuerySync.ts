@@ -88,7 +88,7 @@ export const useCatalogQuerySync = () => {
     if (page > 1) next.set('page', String(page));
     else next.delete('page');
 
-    if (pageSize !== 20) next.set('pageSize', String(pageSize));
+    if (pageSize !== 3) next.set('pageSize', String(pageSize));
     else next.delete('pageSize');
 
     const currentStr = searchParams.toString();

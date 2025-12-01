@@ -1,3 +1,4 @@
+// src/features/catalog/components/ProductCard.tsx
 import {
   Card,
   CardActionArea,
@@ -12,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import FavoriteToggle from '../../favorites/components/FavoriteToggle';
 import type { Product } from '../../../types/product';
+import { useCatalogStore } from '../../../store/catalogStore';
 
 type Props = {
   product: Product;
@@ -21,15 +23,17 @@ type Props = {
 const FALLBACK_IMAGE =
   'https://via.placeholder.com/400x300?text=Product';
 
-const ProductCard = ({ product, viewMode = 'comfortable' }: Props) => {
+const ProductCard = ({ product, viewMode }: Props) => {
   const navigate = useNavigate();
+  const globalViewMode = useCatalogStore((s) => s.viewMode);
+  const mode = viewMode ?? globalViewMode;
   const [imgSrc, setImgSrc] = useState(product.imageUrl || FALLBACK_IMAGE);
 
   const handleClick = () => {
     navigate(`/products/${product.id}`);
   };
 
-  const isCompact = viewMode === 'compact';
+  const isCompact = mode === 'compact';
 
   return (
     <Card
@@ -40,6 +44,7 @@ const ProductCard = ({ product, viewMode = 'comfortable' }: Props) => {
         border: '1px solid',
         borderColor: 'divider',
         height: '100%',
+        width: '100%',          // 🔹 make card stretch to full grid cell width
         display: 'flex',
         flexDirection: 'column',
       }}

@@ -1,3 +1,4 @@
+// src/features/catalog/components/ProductGrid.tsx
 import { Box, Skeleton, Typography } from '@mui/material';
 import type { Product } from '../../../types/product';
 import ProductCard from './ProductCard';
@@ -17,13 +18,13 @@ const ProductGrid = ({ products, isLoading }: Props) => {
     viewMode === 'compact'
       ? {
           xs: '1fr',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(5, 1fr)',
+          sm: 'repeat(2, minmax(0, 1fr))',
+          md: 'repeat(4, minmax(0, 1fr))', // 4 equal-width small tiles
         }
       : {
           xs: '1fr',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(4, 1fr)',
+          sm: 'repeat(2, minmax(0, 1fr))',
+          md: 'repeat(3, minmax(0, 1fr))', // 3 equal-width large tiles
         };
 
   if (isLoading && products.length === 0) {
@@ -36,8 +37,11 @@ const ProductGrid = ({ products, isLoading }: Props) => {
         }}
       >
         {skeletonArray.map((_, index) => (
-          <Box key={index}>
-            <Skeleton variant="rectangular" height={viewMode === 'compact' ? 140 : 180} />
+          <Box key={index} sx={{ height: '100%' }}>
+            <Skeleton
+              variant="rectangular"
+              height={viewMode === 'compact' ? 140 : 180}
+            />
             <Skeleton variant="text" sx={{ mt: 1 }} />
             <Skeleton variant="text" width="60%" />
           </Box>
@@ -78,8 +82,8 @@ const ProductGrid = ({ products, isLoading }: Props) => {
       }}
     >
       {products.map((product) => (
-        <Box key={product.id}>
-          <ProductCard product={product} viewMode={viewMode} />
+        <Box key={product.id} sx={{ height: '100%' }}>
+          <ProductCard product={product} />
         </Box>
       ))}
     </Box>

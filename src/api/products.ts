@@ -26,8 +26,8 @@ function buildProductsUrl(params: ProductsQueryParams): string {
 
   if (params.search) url.searchParams.set('q', params.search);
   if (params.tag) url.searchParams.set('tag', params.tag);
-  if (typeof params.inStock === 'boolean') {
-    url.searchParams.set('inStock', String(params.inStock));
+  if (params.inStock === true) {
+    url.searchParams.set('inStock', 'true');
   }
   if (params.sortBy) url.searchParams.set('sortBy', params.sortBy);
   if (params.sortDir) url.searchParams.set('sortDir', params.sortDir);
@@ -92,6 +92,20 @@ export function useFavoriteProducts(ids: string[]) {
     queryKey: ['favoriteProducts', ids],
     queryFn: () => fetchProductsByIds(ids),
     enabled: ids.length > 0,
+  });
+}
+
+export function useAllProductsForSearch() {
+  return useQuery<PaginatedProducts, Error>({
+    queryKey: ['products', 'all'],
+    queryFn: () =>
+      fetchProducts({
+        page: 1,
+        pageSize: 1000,
+        sortBy: 'name',
+        sortDir: 'asc',
+      }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 

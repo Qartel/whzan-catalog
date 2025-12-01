@@ -1,3 +1,4 @@
+// src/features/catalog/components/CatalogToolbar.tsx
 import {
   Box,
   TextField,
@@ -12,13 +13,20 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import ViewCompactIcon from '@mui/icons-material/ViewCompact';
 import SearchIcon from '@mui/icons-material/Search';
 import SortIcon from '@mui/icons-material/Sort';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewCompactIcon from '@mui/icons-material/ViewCompact';
 import type { SelectChangeEvent } from '@mui/material/Select';
-import { useCatalogStore } from '../../../store/catalogStore';
-import type { SortBy, SortDir } from '../../../store/catalogStore';
+import {
+  useCatalogStore
+} from '../../../store/catalogStore';
+import type {
+  SortBy,
+  SortDir,
+} from '../../../store/catalogStore';
+import { useAllProductsForSearch } from '../../../api/products';
+import { useEffect, useMemo, useState } from 'react';
 
 const CatalogToolbar = () => {
   const search = useCatalogStore((s) => s.search);
@@ -34,6 +42,85 @@ const CatalogToolbar = () => {
   const setPageSize = useCatalogStore((s) => s.setPageSize);
   const viewMode = useCatalogStore((s) => s.viewMode);
   const setViewMode = useCatalogStore((s) => s.setViewMode);
+
+  // ---------- Search suggestions ----------
+  const { data: allProducts } = useAllProductsForSearch();
+  const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
+
+  // Build a list of candidate suggestions (product names)
+  const suggestionList = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q || !allProducts?.items) return [];
+
+    const names = allProducts.items.map((p) => p.name);
+
+    // Prefer names that start with the query
+    let starts = names.filter((name) =>
+      name.toLowerCase().startsWith(q)
+    );
+
+    // If none start with it, fall back to "contains"
+    if (starts.length === 0) {
+      starts = names.filter((name) =>
+        name.toLowerCase().includes(q)
+      );
+    }
+
+    // Deduplicate & keep stable order
+    return Array.from(new Set(starts));
+  }, [search, allProducts]);
+
+  // Currently highlighted suggestion
+  const currentSuggestion =
+    search.trim().length > 0 && suggestionList.length > 0
+      ? suggestionList[highlightIndex ?? 0] ?? suggestionList[0]
+      : null;
+
+  // Reset highlight whenever search text changes
+  useEffect(() => {
+    setHighlightIndex(null);
+  }, [search]);
+
+  const handleSearchKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (!suggestionList.length) return;
+
+    if (e.key === 'ArrowRight') {
+      // Accept current suggestion
+      if (currentSuggestion) {
+        e.preventDefault();
+        setSearch(currentSuggestion);
+        setHighlightIndex(null);
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightIndex((prev) => {
+        if (prev === null) return 0;
+        return (prev + 1) % suggestionList.length;
+      });
+      return;
+    }
+
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightIndex((prev) => {
+        if (prev === null) return suggestionList.length - 1;
+        return (prev - 1 + suggestionList.length) % suggestionList.length;
+      });
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setHighlightIndex(null);
+      return;
+    }
+  };
+
 
   const handleSortChange = (event: SelectChangeEvent) => {
     const value = event.target.value as string;
@@ -62,8 +149,8 @@ const CatalogToolbar = () => {
     setTag(null);
     setInStockOnly(false);
     setSort('updatedAt', 'desc');
-    setPageSize(20);
     setPage(1);
+    setPageSize(viewMode === 'comfortable' ? 3 : 8);
   };
 
   return (
@@ -78,24 +165,64 @@ const CatalogToolbar = () => {
           alignItems: { xs: 'stretch', sm: 'center' },
         }}
       >
-        <TextField
-          size="small"
-          fullWidth
-          label="Search products"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search products by name, tag, or description..."
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-            inputProps: {
-              'aria-label': 'Search products',
-            },
-          }}
-        />
+        {/* Fancy search input with inline suggestion */}
+        <Box sx={{ position: 'relative', flex: 1 }}>
+          {/* Ghost suggestion overlay */}
+          {currentSuggestion &&
+            currentSuggestion.toLowerCase() !==
+              search.trim().toLowerCase() &&
+            currentSuggestion
+              .toLowerCase()
+              .startsWith(search.trim().toLowerCase()) && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  pointerEvents: 'none',
+                  pl: '40px', // space for search icon
+                  pr: 2,
+                  fontSize: '0.875rem',
+                  fontFamily: 'inherit',
+                  color: 'text.disabled',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  opacity: 0.8,
+                }}
+              >
+                {/* Hidden part to align grey suggestion with actual text */}
+                <span style={{ visibility: 'hidden' }}>{search}</span>
+                <span>
+                  {currentSuggestion.slice(search.length)}
+                </span>
+              </Box>
+            )}
+
+          <TextField
+            size="small"
+            fullWidth
+            label="Search products"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="Search products by name, tag, or description..."
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+              inputProps: {
+                'aria-label': 'Search products',
+                autoComplete: 'off',
+              },
+            }}
+          />
+        </Box>
 
         <FormControlLabel
           control={
@@ -176,6 +303,7 @@ const CatalogToolbar = () => {
 
         <Box sx={{ flexGrow: 1 }} />
 
+        {/* view mode toggle */}
         <ToggleButtonGroup
           size="small"
           value={viewMode}
@@ -183,6 +311,8 @@ const CatalogToolbar = () => {
           onChange={(_, value) => {
             if (!value) return;
             setViewMode(value);
+            setPageSize(value === 'comfortable' ? 3 : 8);
+            setPage(1);
           }}
           aria-label="Tile density"
         >

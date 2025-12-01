@@ -43,7 +43,7 @@ export const useCatalogStore = create<CatalogState>()(
       sortBy: 'updatedAt',
       sortDir: 'desc',
       page: 1,
-      pageSize: 20,
+      pageSize: 3,
       viewMode: 'comfortable',
 
       favorites: [],
