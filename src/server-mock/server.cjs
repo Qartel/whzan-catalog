@@ -95,6 +95,25 @@ function filterAndSortProducts(query) {
 // Routes
 app.get('/api/products', (req, res) => {
   try {
+    const { ids } = req.query;
+
+    // If ids are provided, return only those products (no pagination)
+    if (ids) {
+      const idList = String(ids)
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean);
+
+      const items = products.filter((p) => idList.includes(p.id));
+      return res.json({
+        items,
+        total: items.length,
+        page: 1,
+        pageSize: items.length || 1,
+      });
+    }
+
+    // Otherwise apply normal filters/sorting/pagination
     const data = filterAndSortProducts(req.query);
     res.json(data);
   } catch (err) {

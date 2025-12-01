@@ -54,6 +54,18 @@ async function fetchProductById(id: string): Promise<Product> {
   return res.json();
 }
 
+async function fetchProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return [];
+  const url = new URL('/api/products', API_BASE_URL);
+  url.searchParams.set('ids', ids.join(','));
+  const res = await fetch(url.toString());
+  if (!res.ok) {
+    throw new Error('Failed to fetch favorite products');
+  }
+  const data = (await res.json()) as PaginatedProducts;
+  return data.items;
+}
+
 export function useProducts(params: ProductsQueryParams) {
   return useQuery<PaginatedProducts, Error>({
     queryKey: ['products', params],
@@ -74,3 +86,12 @@ export function useProductById(id?: string) {
     enabled: !!id,
   });
 }
+
+export function useFavoriteProducts(ids: string[]) {
+  return useQuery<Product[], Error>({
+    queryKey: ['favoriteProducts', ids],
+    queryFn: () => fetchProductsByIds(ids),
+    enabled: ids.length > 0,
+  });
+}
+
