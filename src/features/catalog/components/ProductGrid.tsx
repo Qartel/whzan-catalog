@@ -1,6 +1,7 @@
 import { Box, Skeleton, Typography } from '@mui/material';
 import type { Product } from '../../../types/product';
 import ProductCard from './ProductCard';
+import { useCatalogStore } from '../../../store/catalogStore';
 
 type Props = {
   products: Product[];
@@ -10,22 +11,33 @@ type Props = {
 const skeletonArray = Array.from({ length: 8 });
 
 const ProductGrid = ({ products, isLoading }: Props) => {
+  const viewMode = useCatalogStore((s) => s.viewMode);
+
+  const columns =
+    viewMode === 'compact'
+      ? {
+          xs: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(5, 1fr)',
+        }
+      : {
+          xs: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(4, 1fr)',
+        };
+
   if (isLoading && products.length === 0) {
     return (
       <Box
         sx={{
           display: 'grid',
           gap: 2,
-          gridTemplateColumns: {
-            xs: '1fr',
-            sm: '1fr 1fr',
-            md: 'repeat(4, 1fr)',
-          },
+          gridTemplateColumns: columns,
         }}
       >
         {skeletonArray.map((_, index) => (
           <Box key={index}>
-            <Skeleton variant="rectangular" height={180} />
+            <Skeleton variant="rectangular" height={viewMode === 'compact' ? 140 : 180} />
             <Skeleton variant="text" sx={{ mt: 1 }} />
             <Skeleton variant="text" width="60%" />
           </Box>
@@ -62,16 +74,12 @@ const ProductGrid = ({ products, isLoading }: Props) => {
       sx={{
         display: 'grid',
         gap: 2,
-        gridTemplateColumns: {
-          xs: '1fr',
-          sm: '1fr 1fr',
-          md: 'repeat(4, 1fr)',
-        },
+        gridTemplateColumns: columns,
       }}
     >
       {products.map((product) => (
         <Box key={product.id}>
-          <ProductCard product={product} />
+          <ProductCard product={product} viewMode={viewMode} />
         </Box>
       ))}
     </Box>

@@ -4,6 +4,7 @@ import { useProducts } from '../../../api/products';
 import CatalogToolbar from '../components/CatalogToolbar';
 import ProductGrid from '../components/ProductGrid';
 import { useCatalogQuerySync } from '../hooks/useCatalogQuerySync';
+import { useDebouncedValue } from '../../../lib/useDebouncedValue';
 
 const CatalogPage = () => {
   useCatalogQuerySync();
@@ -15,9 +16,10 @@ const CatalogPage = () => {
   const page = useCatalogStore((s) => s.page);
   const pageSize = useCatalogStore((s) => s.pageSize);
   const setPage = useCatalogStore((s) => s.setPage);
+  const debouncedSearch = useDebouncedValue(search, 300);
 
   const { data, isLoading, isError, error, isFetching } = useProducts({
-    search,
+    search: debouncedSearch,
     inStock: inStockOnly,
     sortBy,
     sortDir,

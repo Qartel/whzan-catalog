@@ -9,7 +9,11 @@ import {
   Select,
   MenuItem,
   Button,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewCompactIcon from '@mui/icons-material/ViewCompact';
 import SearchIcon from '@mui/icons-material/Search';
 import SortIcon from '@mui/icons-material/Sort';
 import type { SelectChangeEvent } from '@mui/material/Select';
@@ -28,6 +32,8 @@ const CatalogToolbar = () => {
   const setTag = useCatalogStore((s) => s.setTag);
   const setPage = useCatalogStore((s) => s.setPage);
   const setPageSize = useCatalogStore((s) => s.setPageSize);
+  const viewMode = useCatalogStore((s) => s.viewMode);
+  const setViewMode = useCatalogStore((s) => s.setViewMode);
 
   const handleSortChange = (event: SelectChangeEvent) => {
     const value = event.target.value as string;
@@ -169,6 +175,24 @@ const CatalogToolbar = () => {
         </Button>
 
         <Box sx={{ flexGrow: 1 }} />
+
+        <ToggleButtonGroup
+          size="small"
+          value={viewMode}
+          exclusive
+          onChange={(_, value) => {
+            if (!value) return;
+            setViewMode(value);
+          }}
+          aria-label="Tile density"
+        >
+          <ToggleButton value="comfortable" aria-label="Comfortable view">
+            <ViewModuleIcon fontSize="small" />
+          </ToggleButton>
+          <ToggleButton value="compact" aria-label="Compact view">
+            <ViewCompactIcon fontSize="small" />
+          </ToggleButton>
+        </ToggleButtonGroup>
 
         <Button
           size="small"

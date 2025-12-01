@@ -1,4 +1,3 @@
-// src/features/catalog/components/ProductCard.tsx
 import {
   Card,
   CardActionArea,
@@ -10,19 +9,27 @@ import {
   Stack,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import FavoriteToggle from '../../favorites/components/FavoriteToggle';
 import type { Product } from '../../../types/product';
 
 type Props = {
   product: Product;
+  viewMode?: 'comfortable' | 'compact';
 };
 
-const ProductCard = ({ product }: Props) => {
+const FALLBACK_IMAGE =
+  'https://via.placeholder.com/400x300?text=Product';
+
+const ProductCard = ({ product, viewMode = 'comfortable' }: Props) => {
   const navigate = useNavigate();
+  const [imgSrc, setImgSrc] = useState(product.imageUrl || FALLBACK_IMAGE);
 
   const handleClick = () => {
     navigate(`/products/${product.id}`);
   };
+
+  const isCompact = viewMode === 'compact';
 
   return (
     <Card
@@ -49,10 +56,11 @@ const ProductCard = ({ product }: Props) => {
         <Box sx={{ position: 'relative' }}>
           <CardMedia
             component="img"
-            height="180"
-            image={product.imageUrl}
+            height={isCompact ? 140 : 180}
+            image={imgSrc}
             alt={product.name}
             loading="lazy"
+            onError={() => setImgSrc(FALLBACK_IMAGE)}
           />
           <Box
             sx={{
@@ -70,11 +78,12 @@ const ProductCard = ({ product }: Props) => {
             flexGrow: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: 1,
+            gap: isCompact ? 0.5 : 1,
+            py: isCompact ? 1 : 1.5,
           }}
         >
           <Typography
-            variant="subtitle1"
+            variant={isCompact ? 'subtitle2' : 'subtitle1'}
             sx={{
               fontWeight: 600,
               overflow: 'hidden',
@@ -87,9 +96,11 @@ const ProductCard = ({ product }: Props) => {
             {product.name}
           </Typography>
 
-          <Typography variant="body2" color="text.secondary" noWrap>
-            {product.shortDescription}
-          </Typography>
+          {!isCompact && (
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {product.shortDescription}
+            </Typography>
+          )}
 
           <Box
             sx={{
@@ -121,12 +132,14 @@ const ProductCard = ({ product }: Props) => {
             <Typography variant="caption" color="text.secondary">
               ⭐ {product.rating.toFixed(1)} ({product.reviewCount})
             </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {product.category}
-            </Typography>
+            {!isCompact && (
+              <Typography variant="caption" color="text.secondary">
+                {product.category}
+              </Typography>
+            )}
           </Box>
 
-          {product.tags?.length > 0 && (
+          {product.tags?.length > 0 && !isCompact && (
             <Stack direction="row" spacing={0.5} mt={1} flexWrap="wrap">
               {product.tags.slice(0, 3).map((tag) => (
                 <Chip
