@@ -10,11 +10,15 @@ import {
   IconButton,
 } from '@mui/material';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import DarkModeIcon from '@mui/icons-material/DarkModeOutlined';
+import LightModeIcon from '@mui/icons-material/LightModeOutlined';
 import {
   Link as RouterLink,
   NavLink,
   useMatch,
 } from 'react-router-dom';
+import { useTheme } from '@mui/material/styles';
+import { useUiStore } from '../../store/uiStore';
 
 type Props = {
   children: ReactNode;
@@ -27,7 +31,6 @@ type NavButtonProps = {
 };
 
 const NavButton = ({ to, label, end }: NavButtonProps) => {
-  // useMatch tells us if the current URL matches this "to"
   const match = useMatch({ path: to, end: end ?? false });
   const isActive = Boolean(match);
 
@@ -52,6 +55,10 @@ const NavButton = ({ to, label, end }: NavButtonProps) => {
 };
 
 const MainLayout = ({ children }: Props) => {
+  const theme = useTheme();
+  const mode = useUiStore((s) => s.mode);
+  const toggleMode = useUiStore((s) => s.toggleMode);
+
   return (
     <Box
       sx={{
@@ -62,15 +69,14 @@ const MainLayout = ({ children }: Props) => {
         flexDirection: 'column',
       }}
     >
-      {/* Top app bar */}
       <AppBar
         position="static"
         elevation={0}
         sx={{
           borderBottom: '1px solid',
           borderColor: 'divider',
-          bgcolor: 'rgba(15,23,42,0.9)',
-          backdropFilter: 'blur(16px)',
+          bgcolor: 'background.paper',
+          color: 'text.primary',
         }}
       >
         <Toolbar>
@@ -117,8 +123,23 @@ const MainLayout = ({ children }: Props) => {
               </Box>
             </Box>
 
-            {/* Right: nav */}
-            <Box sx={{ display: 'flex', gap: 1 }}>
+            {/* Right: mode toggle + nav */}
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <IconButton
+                size="small"
+                onClick={toggleMode}
+                sx={{
+                  borderRadius: 9999,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                {mode === 'dark' ? (
+                  <LightModeIcon fontSize="small" />
+                ) : (
+                  <DarkModeIcon fontSize="small" />
+                )}
+              </IconButton>
               <NavButton to="/" label="Catalog" end />
               <NavButton to="/favorites" label="Saved" />
             </Box>
@@ -131,7 +152,7 @@ const MainLayout = ({ children }: Props) => {
         <Container
           maxWidth={false}
           sx={{
-            maxWidth: 1200, // roughly 3 large cards + padding
+            maxWidth: 1200,
             mx: 'auto',
             px: { xs: 2, sm: 3 },
           }}

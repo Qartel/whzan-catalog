@@ -1,4 +1,6 @@
 export interface Product {
+  description: ReactNode;
+  ratingCount: ReactNode;
   id: string;
   name: string;
   price: number;

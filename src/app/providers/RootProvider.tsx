@@ -1,91 +1,93 @@
 // src/app/providers/RootProvider.tsx
 import type { ReactNode } from 'react';
+import { useMemo } from 'react';
 import {
+  CssBaseline,
   ThemeProvider,
   createTheme,
-  CssBaseline,
+  responsiveFontSizes,
 } from '@mui/material';
-import type { PaletteMode } from '@mui/material';
-import {
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-
-type RootProviderProps = {
-  children: ReactNode;
-};
-
-const mode: PaletteMode = 'dark';
-
-// Our core black/grey/white + green accent theme
-const theme = createTheme({
-  palette: {
-    mode,
-    primary: {
-      main: '#22c55e', // green accent
-    },
-    secondary: {
-      main: '#16a34a',
-    },
-    background: {
-      default: '#050509', // page background
-      paper: '#0b0b10',   // card background
-    },
-    text: {
-      primary: '#f9fafb',   // near white
-      secondary: '#9ca3af', // grey
-    },
-    divider: '#111827',
-  },
-  shape: {
-    borderRadius: 12,
-  },
-  typography: {
-    fontFamily: [
-      'system-ui',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'sans-serif',
-    ].join(','),
-    h4: {
-      fontWeight: 600,
-    },
-    button: {
-      textTransform: 'none',
-      fontWeight: 500,
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: 9999,
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-        },
-      },
-    },
-  },
-});
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
+import App from '../App';
+import { useUiStore } from '../../store/uiStore';
 
 const queryClient = new QueryClient();
 
-const RootProvider = ({ children }: RootProviderProps) => {
+type Props = {
+  children?: ReactNode;
+};
+
+const RootProvider = ({ children }: Props) => {
+  const mode = useUiStore((s) => s.mode);
+
+  const theme = useMemo(() => {
+    let paletteOverrides =
+      mode === 'light'
+        ? {
+            mode: 'light' as const,
+            primary: { main: '#2563EB' },
+            secondary: { main: '#22C55E' },
+            background: {
+              default: '#F3F4F6',
+              paper: '#FFFFFF',
+            },
+            text: {
+              primary: '#111827',
+              secondary: '#6B7280',
+            },
+          }
+        : {
+            mode: 'dark' as const,
+            primary: { main: '#16A34A' },
+            secondary: { main: '#22C55E' },
+            background: {
+              default: '#020617',
+              paper: '#020617',
+            },
+            text: {
+              primary: '#E5E7EB',
+              secondary: '#9CA3AF',
+            },
+          };
+
+    let theme = createTheme({
+      palette: paletteOverrides,
+      shape: {
+        borderRadius: 16,
+      },
+      typography: {
+        fontFamily:
+          '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        h4: { fontWeight: 700 },
+        subtitle1: { fontWeight: 600 },
+      },
+      components: {
+        MuiPaper: {
+          styleOverrides: {
+            root: { backgroundImage: 'none' },
+          },
+        },
+        MuiCard: {
+          styleOverrides: {
+            root: { backgroundImage: 'none' },
+          },
+        },
+      },
+    });
+
+    theme = responsiveFontSizes(theme);
+    return theme;
+  }, [mode]);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <QueryClientProvider client={queryClient}>
+        {/* Use existing router higher up in the tree */}
+        {children ?? <App />}
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 };
 

@@ -31,52 +31,42 @@ import { useEffect, useMemo, useState } from 'react';
 const CatalogToolbar = () => {
   const search = useCatalogStore((s) => s.search);
   const setSearch = useCatalogStore((s) => s.setSearch);
-  const inStockOnly = useCatalogStore((s) => s.inStockOnly);
-  const setInStockOnly = useCatalogStore((s) => s.setInStockOnly);
   const sortBy = useCatalogStore((s) => s.sortBy);
   const sortDir = useCatalogStore((s) => s.sortDir);
   const setSort = useCatalogStore((s) => s.setSort);
-  const tag = useCatalogStore((s) => s.tag);
-  const setTag = useCatalogStore((s) => s.setTag);
-  const setPage = useCatalogStore((s) => s.setPage);
-  const setPageSize = useCatalogStore((s) => s.setPageSize);
   const viewMode = useCatalogStore((s) => s.viewMode);
   const setViewMode = useCatalogStore((s) => s.setViewMode);
+  const setPage = useCatalogStore((s) => s.setPage);
+  const setPageSize = useCatalogStore((s) => s.setPageSize);
 
   // ---------- Search suggestions ----------
   const { data: allProducts } = useAllProductsForSearch();
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null);
 
-  // Build a list of candidate suggestions (product names)
   const suggestionList = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q || !allProducts?.items) return [];
 
     const names = allProducts.items.map((p) => p.name);
 
-    // Prefer names that start with the query
     let starts = names.filter((name) =>
       name.toLowerCase().startsWith(q)
     );
 
-    // If none start with it, fall back to "contains"
     if (starts.length === 0) {
       starts = names.filter((name) =>
         name.toLowerCase().includes(q)
       );
     }
 
-    // Deduplicate & keep stable order
     return Array.from(new Set(starts));
   }, [search, allProducts]);
 
-  // Currently highlighted suggestion
   const currentSuggestion =
     search.trim().length > 0 && suggestionList.length > 0
       ? suggestionList[highlightIndex ?? 0] ?? suggestionList[0]
       : null;
 
-  // Reset highlight whenever search text changes
   useEffect(() => {
     setHighlightIndex(null);
   }, [search]);
@@ -87,7 +77,6 @@ const CatalogToolbar = () => {
     if (!suggestionList.length) return;
 
     if (e.key === 'ArrowRight') {
-      // Accept current suggestion
       if (currentSuggestion) {
         e.preventDefault();
         setSearch(currentSuggestion);
@@ -121,7 +110,6 @@ const CatalogToolbar = () => {
     }
   };
 
-
   const handleSortChange = (event: SelectChangeEvent) => {
     const value = event.target.value as string;
     const [field, dir] = value.split(':') as [SortBy, SortDir];
@@ -129,117 +117,79 @@ const CatalogToolbar = () => {
     setPage(1);
   };
 
-  const applyQuickTag = (value: string | null) => {
-    setTag(value);
-    setPage(1);
-  };
-
-  const applyTopRated = () => {
-    setSort('rating', 'desc');
-    setPage(1);
-  };
-
-  const applyNewest = () => {
-    setSort('updatedAt', 'desc');
-    setPage(1);
-  };
-
-  const clearAllFilters = () => {
-    setSearch('');
-    setTag(null);
-    setInStockOnly(false);
-    setSort('updatedAt', 'desc');
-    setPage(1);
-    setPageSize(viewMode === 'comfortable' ? 3 : 8);
-  };
-
   return (
-    <>
-      {/* Main toolbar row */}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: 2,
+        alignItems: { xs: 'stretch', md: 'center' },
+      }}
+    >
+      {/* Search with inline suggestion */}
+      <Box sx={{ position: 'relative', flexGrow: 1 }}>
+        {currentSuggestion &&
+          currentSuggestion.toLowerCase() !==
+            search.trim().toLowerCase() &&
+          currentSuggestion
+            .toLowerCase()
+            .startsWith(search.trim().toLowerCase()) && (
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none',
+                pl: '40px',
+                pr: 2,
+                fontSize: '0.875rem',
+                fontFamily: 'inherit',
+                color: 'text.disabled',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                opacity: 0.8,
+              }}
+            >
+              <span style={{ visibility: 'hidden' }}>{search}</span>
+              <span>{currentSuggestion.slice(search.length)}</span>
+            </Box>
+          )}
+
+        <TextField
+          size="small"
+          fullWidth
+          label="Search products"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          onKeyDown={handleSearchKeyDown}
+          placeholder="Search products by name, tag, or description..."
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+            inputProps: {
+              'aria-label': 'Search products',
+              autoComplete: 'off',
+            },
+          }}
+        />
+      </Box>
+
       <Box
         sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
           gap: 2,
-          mb: 2,
-          alignItems: { xs: 'stretch', sm: 'center' },
+          alignItems: 'center',
+          justifyContent: { xs: 'space-between', md: 'flex-end' },
         }}
       >
-        {/* Fancy search input with inline suggestion */}
-        <Box sx={{ position: 'relative', flex: 1 }}>
-          {/* Ghost suggestion overlay */}
-          {currentSuggestion &&
-            currentSuggestion.toLowerCase() !==
-              search.trim().toLowerCase() &&
-            currentSuggestion
-              .toLowerCase()
-              .startsWith(search.trim().toLowerCase()) && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none',
-                  pl: '40px', // space for search icon
-                  pr: 2,
-                  fontSize: '0.875rem',
-                  fontFamily: 'inherit',
-                  color: 'text.disabled',
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap',
-                  opacity: 0.8,
-                }}
-              >
-                {/* Hidden part to align grey suggestion with actual text */}
-                <span style={{ visibility: 'hidden' }}>{search}</span>
-                <span>
-                  {currentSuggestion.slice(search.length)}
-                </span>
-              </Box>
-            )}
-
-          <TextField
-            size="small"
-            fullWidth
-            label="Search products"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            onKeyDown={handleSearchKeyDown}
-            placeholder="Search products by name, tag, or description..."
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
-              inputProps: {
-                'aria-label': 'Search products',
-                autoComplete: 'off',
-              },
-            }}
-          />
-        </Box>
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={inStockOnly}
-              onChange={(e) => setInStockOnly(e.target.checked)}
-              color="primary"
-            />
-          }
-          label="In stock only"
-          sx={{ ml: { xs: 0, sm: 1 } }}
-        />
-
-        <FormControl
-          size="small"
-          sx={{ minWidth: 180, ml: { xs: 0, sm: 'auto' } }}
-        >
+        <FormControl size="small" sx={{ minWidth: 180 }}>
           <InputLabel id="sort-label">
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <SortIcon fontSize="small" /> Sort
@@ -259,51 +209,7 @@ const CatalogToolbar = () => {
             <MenuItem value="name:asc">Name A → Z</MenuItem>
           </Select>
         </FormControl>
-      </Box>
 
-      {/* Quick filter row */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 1,
-          mb: 3,
-          alignItems: 'center',
-        }}
-      >
-        <Button
-          size="small"
-          variant={tag === null ? 'contained' : 'outlined'}
-          color="primary"
-          onClick={() => applyQuickTag(null)}
-        >
-          All
-        </Button>
-        <Button
-          size="small"
-          variant={tag === 'audio' ? 'contained' : 'outlined'}
-          onClick={() => applyQuickTag('audio')}
-        >
-          Audio
-        </Button>
-        <Button
-          size="small"
-          variant={tag === 'furniture' ? 'contained' : 'outlined'}
-          onClick={() => applyQuickTag('furniture')}
-        >
-          Furniture
-        </Button>
-        <Button
-          size="small"
-          variant={tag === 'smart-home' ? 'contained' : 'outlined'}
-          onClick={() => applyQuickTag('smart-home')}
-        >
-          Smart home
-        </Button>
-
-        <Box sx={{ flexGrow: 1 }} />
-
-        {/* view mode toggle */}
         <ToggleButtonGroup
           size="small"
           value={viewMode}
@@ -323,32 +229,8 @@ const CatalogToolbar = () => {
             <ViewCompactIcon fontSize="small" />
           </ToggleButton>
         </ToggleButtonGroup>
-
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={applyTopRated}
-        >
-          Top rated
-        </Button>
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={applyNewest}
-        >
-          Newest
-        </Button>
-
-        <Button
-          size="small"
-          variant="text"
-          onClick={clearAllFilters}
-          sx={{ ml: 1 }}
-        >
-          Clear filters
-        </Button>
       </Box>
-    </>
+    </Box>
   );
 };
 

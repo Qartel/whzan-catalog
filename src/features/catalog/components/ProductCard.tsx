@@ -39,7 +39,7 @@ const ProductCard = ({ product, viewMode }: Props) => {
     <Card
       sx={{
         bgcolor: 'background.paper',
-        borderRadius: 2,
+        // borderRadius: 2,
         boxShadow: '0 18px 40px rgba(0,0,0,0.45)',
         border: '1px solid',
         borderColor: 'divider',

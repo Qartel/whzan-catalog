@@ -1,234 +1,408 @@
-// src/features/product/pages/ProductDetailPage.tsx
+// src/features/product/pages/ProductDetailsPage.tsx
+import { useMemo } from 'react';
 import {
   Box,
   Typography,
-  Button,
-  Chip,
   Stack,
-  CircularProgress,
-  Alert,
+  Chip,
+  Button,
+  Paper,
+  Skeleton,
+  useTheme,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import CategoryIcon from '@mui/icons-material/Category';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProductById } from '../../../api/products';
-import FavoriteToggle from '../../favorites/components/FavoriteToggle';
 import { useCatalogStore } from '../../../store/catalogStore';
 
-const ProductDetailPage = () => {
+const ProductDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const theme = useTheme();
 
+  const toggleFavorite = useCatalogStore((s) => s.toggleFavorite);
+  const favorites = useCatalogStore((s) => s.favorites);
   const setTag = useCatalogStore((s) => s.setTag);
-  const setSearch = useCatalogStore((s) => s.setSearch);
-  const setInStockOnly = useCatalogStore((s) => s.setInStockOnly);
-  const setPage = useCatalogStore((s) => s.setPage);
 
-  const { data: product, isLoading, isError, error } = useProductById(id);
+  const productId = id ?? '';
+  const {
+    data: product,
+    isLoading,
+    isError,
+  } = useProductById(productId);
 
-  const handleBack = () => {
-    navigate('/');
-  };
-
-  const handleTagClick = (tag: string) => {
-    // Quick filter: go back to catalog showing this tag
-    setTag(tag);
-    setSearch('');
-    setPage(1);
-    navigate('/');
-  };
-
-  const handleInStockFilter = () => {
-    if (!product) return;
-    setInStockOnly(true);
-    setSearch(product.name.split(' ')[0] ?? '');
-    setPage(1);
-    navigate('/');
-  };
+  const isFavorite = useMemo(
+    () => (product ? favorites.includes(product.id) : false),
+    [favorites, product]
+  );
 
   if (isLoading) {
     return (
-      <Box sx={{ py: 6, textAlign: 'center' }}>
-        <CircularProgress />
+      <Box sx={{ py: 4 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          size="small"
+          sx={{ mb: 2 }}
+        >
+          Back
+        </Button>
+        <Paper
+          sx={{
+            p: { xs: 2, md: 3 },
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '3fr 2fr' },
+              gap: 3,
+            }}
+          >
+            <Skeleton variant="rectangular" height={320} />
+            <Box>
+              <Skeleton width="60%" height={40} />
+              <Skeleton width="30%" height={30} sx={{ mt: 2 }} />
+              <Skeleton width="80%" height={20} sx={{ mt: 3 }} />
+              <Skeleton width="70%" height={20} />
+            </Box>
+          </Box>
+        </Paper>
       </Box>
     );
   }
 
   if (isError || !product) {
     return (
-      <Box sx={{ py: 6 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error?.message || 'Product could not be loaded.'}
-        </Alert>
-        <Button variant="outlined" onClick={handleBack} color="primary">
-          Back to catalog
+      <Box sx={{ py: 4 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          size="small"
+          sx={{ mb: 2 }}
+        >
+          Back
         </Button>
+        <Typography variant="h6">Product not found.</Typography>
       </Box>
     );
   }
 
-  const updatedDate = new Date(product.updatedAt).toLocaleDateString();
+  const handleViewCategory = () => {
+    // Go back to catalog with this category/tag selected
+    if (product.tags && product.tags.length > 0) {
+      setTag(product.tags[0]); // simple mapping; adjust if you have a dedicated category key
+    }
+    navigate('/');
+  };
+
+  const priceFormatted = `USD ${product.price.toFixed(2)}`;
 
   return (
-    <Box>
-      {/* Top actions */}
-      <Box
+    <Box sx={{ py: 4 }}>
+      {/* Back link */}
+      <Button
+        startIcon={<ArrowBackIcon />}
+        onClick={() => navigate(-1)}
+        size="small"
+        sx={{ mb: 2, textTransform: 'none', fontWeight: 500 }}
+      >
+        Back
+      </Button>
+
+      {/* Main card */}
+      <Paper
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 2,
-          gap: 2,
+          p: { xs: 2, md: 3 },
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: 'divider',
         }}
       >
-        <Button variant="text" color="inherit" onClick={handleBack}>
-          ← Back to catalog
-        </Button>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FavoriteToggle productId={product.id} />
-          <Chip
-            label={product.inStock ? 'In stock' : 'Out of stock'}
-            color={product.inStock ? 'success' : 'default'}
-            variant={product.inStock ? 'filled' : 'outlined'}
-            size="small"
-          />
-        </Box>
-      </Box>
-
-      {/* Main layout: image + details */}
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          gap: 4,
-        }}
-      >
-        {/* Image */}
+        {/* Top: image + details */}
         <Box
           sx={{
-            flex: 1,
-            borderRadius: 2,
-            overflow: 'hidden',
-            border: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.paper',
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '3fr 2fr' },
+            gap: { xs: 3, md: 4 },
+            alignItems: 'flex-start',
           }}
         >
-          <Box
-            component="img"
-            src={product.imageUrl}
-            alt={product.name}
-            sx={{
-              width: '100%',
-              height: { xs: 260, md: 340 },
-              objectFit: 'cover',
-              display: 'block',
-            }}
-          />
-        </Box>
-
-        {/* Details */}
-        <Box sx={{ flex: 1.1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Box>
-            <Typography variant="h4" mb={1}>
-              {product.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {product.shortDescription}
-            </Typography>
-          </Box>
-
+          {/* Image section */}
           <Box
             sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 2,
-              alignItems: 'center',
+              position: 'relative',
+              overflow: 'hidden',
+              bgcolor: 'background.default',
             }}
           >
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              {product.currency} {product.price.toFixed(2)}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              ⭐ {product.rating.toFixed(1)} ({product.reviewCount} reviews)
-            </Typography>
-            <Chip
-              label={product.category}
-              variant="outlined"
-              size="small"
-              sx={{ borderRadius: 9999 }}
+            <Box
+              component="img"
+              src={product.imageUrl}
+              alt={product.name}
+              sx={{
+                width: '100%',
+                display: 'block',
+                objectFit: 'cover',
+                maxHeight: { xs: 360, md: 420 },
+              }}
             />
-          </Box>
 
-          <Box>
-            <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              sx={{ textTransform: 'uppercase', letterSpacing: 0.8, mb: 1 }}
-            >
-              Tags
-            </Typography>
-            {product.tags && product.tags.length > 0 ? (
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {product.tags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    onClick={() => handleTagClick(tag)}
-                    sx={{
-                      borderRadius: 9999,
-                      cursor: 'pointer',
-                    }}
-                    color="primary"
-                    variant="outlined"
-                  />
-                ))}
-              </Stack>
-            ) : (
-              <Typography variant="body2" color="text.secondary">
-                No tags available.
-              </Typography>
+            {/* Stock badge */}
+            {!product.inStock && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  px: 2,
+                  py: 0.5,
+                  borderRadius: 9999,
+                  bgcolor: theme.palette.error.main,
+                  color: '#fff',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                }}
+              >
+                Out of Stock
+              </Box>
             )}
           </Box>
 
+          {/* Details section */}
           <Box>
+            {/* Title */}
             <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              sx={{ textTransform: 'uppercase', letterSpacing: 0.8, mb: 1 }}
+              variant="h5"
+              sx={{ fontWeight: 700, mb: 1 }}
             >
-              Quick actions
+              {product.name}
             </Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap">
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={() => handleTagClick(product.category)}
-              >
-                Show more in {product.category}
-              </Button>
-              {product.inStock && (
-                <Button
-                  variant="contained"
-                  size="small"
-                  color="primary"
-                  onClick={handleInStockFilter}
-                >
-                  Find similar in stock
-                </Button>
-              )}
-            </Stack>
-          </Box>
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="caption" color="text.secondary">
-              Last updated on {updatedDate}
+            {/* Rating row */}
+            <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
+              <Stack direction="row" spacing={0.25}>
+                {Array.from({ length: 5 }).map((_, index) =>
+                  index < Math.round(product.rating) ? (
+                    <StarIcon
+                      key={index}
+                      fontSize="small"
+                      sx={{ color: '#FACC15' }}
+                    />
+                  ) : (
+                    <StarBorderIcon
+                      key={index}
+                      fontSize="small"
+                      sx={{ color: '#FACC15' }}
+                    />
+                  )
+                )}
+              </Stack>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontSize: '0.85rem' }}
+              >
+                {product.rating.toFixed(1)} ({product.ratingCount} reviews)
+              </Typography>
+            </Stack>
+
+            {/* Price */}
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 700,
+                color: 'primary.main',
+                mb: 2,
+              }}
+            >
+              {priceFormatted}
+              <Typography
+                component="span"
+                sx={{
+                  ml: 1,
+                  fontSize: '0.875rem',
+                  color: 'text.secondary',
+                }}
+              >
+                USD
+              </Typography>
             </Typography>
+
+            {/* Category */}
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              mb={1}
+            >
+              <CategoryIcon
+                fontSize="small"
+                sx={{ color: 'text.secondary' }}
+              />
+              <Typography
+                variant="body2"
+                color="text.secondary"
+              >
+                Category:{' '}
+                <Typography
+                  component="span"
+                  sx={{ fontWeight: 600 }}
+                >
+                  {product.category}
+                </Typography>
+              </Typography>
+            </Stack>
+
+            {/* Stock line */}
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              mb={3}
+            >
+              <ErrorOutlineIcon
+                fontSize="small"
+                sx={{
+                  color: product.inStock
+                    ? theme.palette.success.main
+                    : theme.palette.error.main,
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 500,
+                  color: product.inStock
+                    ? theme.palette.success.main
+                    : theme.palette.error.main,
+                }}
+              >
+                {product.inStock ? 'In stock' : 'Out of Stock'}
+              </Typography>
+            </Stack>
+
+            {/* Description */}
+            <Box mb={3}>
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 600, mb: 1 }}
+              >
+                Description
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ lineHeight: 1.6 }}
+              >
+                {product.description}
+              </Typography>
+            </Box>
+
+            {/* Tags */}
+            {product.tags && product.tags.length > 0 && (
+              <Box mb={3}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ fontWeight: 600, mb: 1 }}
+                >
+                  Tags
+                </Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {product.tags.map((tagValue) => (
+                    <Chip
+                      key={tagValue}
+                      label={tagValue}
+                      size="small"
+                      sx={{
+                        mb: 1,
+                        borderRadius: 9999,
+                        fontSize: '0.8rem',
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            )}
           </Box>
         </Box>
+
+        {/* Favorites bar */}
+        <Box
+          sx={{
+            mt: 3,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            px: { xs: 0, md: 2 },
+            py: 2,
+            bgcolor:
+              theme.palette.mode === 'light'
+                ? 'grey.50'
+                : 'background.default',
+          }}
+        >
+          <Stack
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            spacing={1}
+          >
+            {isFavorite ? (
+              <FavoriteIcon
+                sx={{ color: theme.palette.error.main }}
+              />
+            ) : (
+              <FavoriteBorderIcon sx={{ color: 'text.secondary' }} />
+            )}
+            <Button
+              onClick={() => toggleFavorite(product.id)}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+                color: 'text.primary',
+              }}
+            >
+              {isFavorite ? 'Remove from favorites' : 'Add to Favorites'}
+            </Button>
+          </Stack>
+        </Box>
+      </Paper>
+
+      {/* Similar products section */}
+      <Box sx={{ mt: 4 }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 600, mb: 1 }}
+        >
+          Similar Products
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 2 }}
+        >
+          Check out other items in the{' '}
+          <strong>{product.category}</strong> category.
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={handleViewCategory}
+          sx={{ textTransform: 'none', fontWeight: 600 }}
+        >
+          View all {product.category}
+        </Button>
       </Box>
     </Box>
   );
 };
 
-export default ProductDetailPage;
+export default ProductDetailsPage;
