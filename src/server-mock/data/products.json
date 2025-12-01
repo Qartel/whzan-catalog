@@ -1,0 +1,58 @@
+[
+  {
+    "id": "itm_001",
+    "name": "Wireless Noise-Cancelling Headphones",
+    "price": 199.99,
+    "currency": "USD",
+    "rating": 4.7,
+    "reviewCount": 312,
+    "tags": ["audio", "wireless", "premium"],
+    "category": "Electronics",
+    "inStock": true,
+    "imageUrl": "https://via.placeholder.com/400x300?text=Headphones",
+    "updatedAt": "2025-01-15T12:30:00Z",
+    "shortDescription": "Over-ear wireless headphones with adaptive noise cancelling."
+  },
+  {
+    "id": "itm_002",
+    "name": "Compact Bluetooth Speaker",
+    "price": 49.99,
+    "currency": "USD",
+    "rating": 4.4,
+    "reviewCount": 120,
+    "tags": ["audio", "portable"],
+    "category": "Electronics",
+    "inStock": true,
+    "imageUrl": "https://via.placeholder.com/400x300?text=Speaker",
+    "updatedAt": "2025-01-10T09:00:00Z",
+    "shortDescription": "Pocket-sized speaker with surprising bass and 12h battery life."
+  },
+  {
+    "id": "itm_003",
+    "name": "Ergonomic Office Chair",
+    "price": 289.0,
+    "currency": "USD",
+    "rating": 4.5,
+    "reviewCount": 89,
+    "tags": ["furniture", "office"],
+    "category": "Home & Office",
+    "inStock": false,
+    "imageUrl": "https://via.placeholder.com/400x300?text=Office+Chair",
+    "updatedAt": "2025-01-18T17:45:00Z",
+    "shortDescription": "Mesh-back chair with adjustable lumbar support and headrest."
+  },
+  {
+    "id": "itm_004",
+    "name": "Smart LED Desk Lamp",
+    "price": 39.99,
+    "currency": "USD",
+    "rating": 4.2,
+    "reviewCount": 54,
+    "tags": ["lighting", "smart-home"],
+    "category": "Home & Office",
+    "inStock": true,
+    "imageUrl": "https://via.placeholder.com/400x300?text=Desk+Lamp",
+    "updatedAt": "2025-01-12T11:15:00Z",
+    "shortDescription": "Adjustable desk lamp with touch dimmer and USB charging port."
+  }
+]
