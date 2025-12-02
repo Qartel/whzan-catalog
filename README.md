@@ -31,9 +31,12 @@ This project showcases:
 
 # INSTALL INSTRUCTIONS:
 
+>>>>> Clone the repo
 >>>>> npm i
 >>>>> npm run dev:server
 >>>>> npm run dev
+
+>>>>> Create a `.env` file if you want to override the API URL:  VITE_API_BASE_URL=http://localhost:4000
 
 ---
 
