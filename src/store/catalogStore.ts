@@ -17,6 +17,10 @@ type CatalogState = {
   pageSize: number;
   viewMode: ViewMode;
 
+  // 🔽 price range in ZAR
+  priceMin: number | null;
+  priceMax: number | null;
+
   // Favorites (product IDs)
   favorites: string[];
 
@@ -28,6 +32,11 @@ type CatalogState = {
   setPage: (page: number) => void;
   setPageSize: (size: number) => void;
   setViewMode: (mode: ViewMode) => void;
+
+  // 🔽 price setters
+  setPriceMin: (value: number | null) => void;
+  setPriceMax: (value: number | null) => void;
+  setPriceRange: (min: number | null, max: number | null) => void;
 
   toggleFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
@@ -45,6 +54,10 @@ export const useCatalogStore = create<CatalogState>()(
       page: 1,
       pageSize: 3,
       viewMode: 'comfortable',
+
+      // 🔽 price range defaults
+      priceMin: null,
+      priceMax: null,
 
       favorites: [],
 
@@ -82,6 +95,26 @@ export const useCatalogStore = create<CatalogState>()(
         }),
 
       setViewMode: (mode) => set({ viewMode: mode }),
+
+      // 🔽 price range setters
+      setPriceMin: (priceMin) =>
+        set({
+          priceMin,
+          page: 1,
+        }),
+
+      setPriceMax: (priceMax) =>
+        set({
+          priceMax,
+          page: 1,
+        }),
+
+      setPriceRange: (priceMin, priceMax) =>
+        set({
+          priceMin,
+          priceMax,
+          page: 1,
+        }),
 
       toggleFavorite: (id) => {
         const { favorites } = get();

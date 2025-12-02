@@ -25,6 +25,9 @@ const CatalogPage = () => {
 
   const debouncedSearch = useDebouncedValue(search, 300);
 
+  const priceMin = useCatalogStore((s) => s.priceMin);
+  const priceMax = useCatalogStore((s) => s.priceMax);
+
   const { data, isLoading, isError, error, isFetching } = useProducts({
     search: debouncedSearch,
     inStock: inStockOnly,
@@ -33,6 +36,8 @@ const CatalogPage = () => {
     page,
     pageSize,
     tag,
+    priceMin,
+    priceMax, // ← add these
   });
 
   const products = data?.items ?? [];

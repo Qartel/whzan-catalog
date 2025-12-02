@@ -40,6 +40,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
       ? 220
       : 170; // tweak if you want smaller/ larger
 
+  const reviewCount =
+  product.ratingCount ??
+  product.reviewCount ??
+  product.reviews ??
+  0;
+
   return (
     <Paper
       onClick={handleOpenDetails}
@@ -172,7 +178,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Stack direction="row" spacing={0.5} alignItems="center">
             <StarIcon sx={{ fontSize: 18, color: '#FACC15' }} />
             <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-              {product.rating.toFixed(1)} ({product.ratingCount})
+              {product.rating.toFixed(1)} ({reviewCount})
             </Typography>
           </Stack>
          </Box>

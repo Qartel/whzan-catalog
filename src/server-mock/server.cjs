@@ -1,3 +1,4 @@
+// server-mock/server.cjs
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -22,6 +23,8 @@ function filterAndSortProducts(query) {
     sortDir = 'desc',
     page = '1',
     pageSize = '20',
+    priceMin,
+    priceMax,
   } = query;
 
   let result = [...products];
@@ -52,6 +55,17 @@ function filterAndSortProducts(query) {
     } else if (inStock === 'false') {
       result = result.filter((p) => p.inStock === false);
     }
+  }
+
+  // 🔽 Price range filter
+  const min = priceMin != null ? Number(priceMin) : null;
+  const max = priceMax != null ? Number(priceMax) : null;
+
+  if (min != null && !Number.isNaN(min)) {
+    result = result.filter((p) => p.price >= min);
+  }
+  if (max != null && !Number.isNaN(max)) {
+    result = result.filter((p) => p.price <= max);
   }
 
   // Sorting

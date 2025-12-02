@@ -1,3 +1,4 @@
+// src/api/products.ts
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import type { Product } from '../types/product';
 
@@ -12,6 +13,10 @@ export type ProductsQueryParams = {
   sortDir?: 'asc' | 'desc';
   page?: number;
   pageSize?: number;
+
+  // 🔽 NEW
+  priceMin?: number | null;
+  priceMax?: number | null;
 };
 
 export type PaginatedProducts = {
@@ -32,12 +37,23 @@ function buildProductsUrl(params: ProductsQueryParams): string {
   if (params.sortBy) url.searchParams.set('sortBy', params.sortBy);
   if (params.sortDir) url.searchParams.set('sortDir', params.sortDir);
   if (params.page) url.searchParams.set('page', String(params.page));
-  if (params.pageSize) url.searchParams.set('pageSize', String(params.pageSize));
+  if (params.pageSize)
+    url.searchParams.set('pageSize', String(params.pageSize));
+
+  // 🔽 price filters
+  if (params.priceMin != null) {
+    url.searchParams.set('priceMin', String(params.priceMin));
+  }
+  if (params.priceMax != null) {
+    url.searchParams.set('priceMax', String(params.priceMax));
+  }
 
   return url.toString();
 }
 
-async function fetchProducts(params: ProductsQueryParams): Promise<PaginatedProducts> {
+async function fetchProducts(
+  params: ProductsQueryParams
+): Promise<PaginatedProducts> {
   const url = buildProductsUrl(params);
   const res = await fetch(url);
   if (!res.ok) {
@@ -108,4 +124,3 @@ export function useAllProductsForSearch() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
-

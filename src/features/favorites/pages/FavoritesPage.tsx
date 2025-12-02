@@ -49,7 +49,7 @@ const FavoritesPage = () => {
           <Typography variant="h6" mb={1.5}>
             No saved items yet
           </Typography>
-          <Typography variant="body2" color="text.secondary" mb={2}>
+          <Typography variant="body2" color="text.primary" mb={2}>
             Browse the catalog and click the heart icon on any product to save
             it here.
           </Typography>

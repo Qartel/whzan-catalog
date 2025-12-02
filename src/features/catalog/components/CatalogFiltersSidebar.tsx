@@ -1,4 +1,5 @@
 // src/features/catalog/components/CatalogFiltersSidebar.tsx
+import { useState } from 'react';
 import {
   Box,
   Paper,
@@ -30,6 +31,17 @@ const CatalogFiltersSidebar = () => {
   const viewMode = useCatalogStore((s) => s.viewMode);
   const setPageSize = useCatalogStore((s) => s.setPageSize);
 
+  const priceMin = useCatalogStore((s) => s.priceMin);
+  const priceMax = useCatalogStore((s) => s.priceMax);
+  const setPriceRange = useCatalogStore((s) => s.setPriceRange);
+
+  const [minInput, setMinInput] = useState(
+    priceMin != null ? String(priceMin) : ''
+  );
+  const [maxInput, setMaxInput] = useState(
+    priceMax != null ? String(priceMax) : ''
+  );
+
   const handleCategoryChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -42,6 +54,20 @@ const CatalogFiltersSidebar = () => {
     setPage(1);
   };
 
+  const handleApplyPrice = () => {
+    const parsedMin =
+      minInput.trim() === '' ? null : Number(minInput.trim());
+    const parsedMax =
+      maxInput.trim() === '' ? null : Number(maxInput.trim());
+
+    const safeMin =
+      parsedMin == null || Number.isNaN(parsedMin) ? null : parsedMin;
+    const safeMax =
+      parsedMax == null || Number.isNaN(parsedMax) ? null : parsedMax;
+
+    setPriceRange(safeMin, safeMax);
+  };
+
   const clearAll = () => {
     setSearch('');
     setTag(null);
@@ -49,6 +75,11 @@ const CatalogFiltersSidebar = () => {
     setSort('updatedAt', 'desc');
     setPage(1);
     setPageSize(viewMode === 'comfortable' ? 3 : 8);
+
+    // reset price range + inputs
+    setMinInput('');
+    setMaxInput('');
+    setPriceRange(null, null);
   };
 
   return (
@@ -158,6 +189,8 @@ const CatalogFiltersSidebar = () => {
               placeholder="R0"
               variant="outlined"
               InputProps={{ inputProps: { min: 0 } }}
+              value={minInput}
+              onChange={(e) => setMinInput(e.target.value)}
             />
           </Box>
           <Box>
@@ -174,6 +207,8 @@ const CatalogFiltersSidebar = () => {
               placeholder="R1000"
               variant="outlined"
               InputProps={{ inputProps: { min: 0 } }}
+              value={maxInput}
+              onChange={(e) => setMaxInput(e.target.value)}
             />
           </Box>
           <Button
@@ -185,6 +220,7 @@ const CatalogFiltersSidebar = () => {
               textTransform: 'none',
               fontWeight: 600,
             }}
+            onClick={handleApplyPrice}
           >
             Apply
           </Button>
@@ -203,10 +239,7 @@ const CatalogFiltersSidebar = () => {
         </Typography>
 
         <FormControl component="fieldset" variant="standard" fullWidth>
-          <RadioGroup
-            value={tag ?? 'all'}
-            onChange={handleCategoryChange}
-          >
+          <RadioGroup value={tag ?? 'all'} onChange={handleCategoryChange}>
             <FormControlLabel
               value="all"
               control={<Radio size="small" />}
