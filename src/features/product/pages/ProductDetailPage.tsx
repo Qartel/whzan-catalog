@@ -20,6 +20,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProductById } from '../../../api/products';
 import { useCatalogStore } from '../../../store/catalogStore';
+import { getProductImageForId } from '../../../app/assets/productImages';
 
 const ProductDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -105,7 +106,9 @@ const ProductDetailsPage = () => {
     navigate('/');
   };
 
-  const priceFormatted = `USD ${product.price.toFixed(2)}`;
+  const priceFormatted = `R ${product.price.toFixed(2)}`;
+
+  const imageSrc = getProductImageForId(product.id);
 
   return (
     <Box sx={{ py: 4 }}>
@@ -147,7 +150,7 @@ const ProductDetailsPage = () => {
           >
             <Box
               component="img"
-              src={product.imageUrl}
+              src={imageSrc}
               alt={product.name}
               sx={{
                 width: '100%',
@@ -234,7 +237,7 @@ const ProductDetailsPage = () => {
                   color: 'text.secondary',
                 }}
               >
-                USD
+                ZAR
               </Typography>
             </Typography>
 

@@ -42,8 +42,8 @@ const RootProvider = ({ children }: Props) => {
             primary: { main: '#16A34A' },
             secondary: { main: '#22C55E' },
             background: {
-              default: '#020617',
-              paper: '#020617',
+              default: '#0e0e0e',
+              paper: '#0e0e0e',
             },
             text: {
               primary: '#E5E7EB',

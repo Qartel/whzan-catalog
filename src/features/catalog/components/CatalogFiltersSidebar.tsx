@@ -4,18 +4,17 @@ import {
   Paper,
   Typography,
   FormControlLabel,
-  Switch,
-  Button,
+  Checkbox,
   Divider,
   Stack,
   IconButton,
   FormGroup,
-  Checkbox,
   FormControl,
   RadioGroup,
   Radio,
   Chip,
   TextField,
+  Button,
 } from '@mui/material';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import { useCatalogStore } from '../../../store/catalogStore';
@@ -25,21 +24,20 @@ const CatalogFiltersSidebar = () => {
   const setInStockOnly = useCatalogStore((s) => s.setInStockOnly);
   const tag = useCatalogStore((s) => s.tag);
   const setTag = useCatalogStore((s) => s.setTag);
+  const setSearch = useCatalogStore((s) => s.setSearch);
+  const setSort = useCatalogStore((s) => s.setSort);
   const setPage = useCatalogStore((s) => s.setPage);
   const viewMode = useCatalogStore((s) => s.viewMode);
   const setPageSize = useCatalogStore((s) => s.setPageSize);
-  const setSearch = useCatalogStore((s) => s.setSearch);
-  const setSort = useCatalogStore((s) => s.setSort);
 
   const handleCategoryChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = (event.target as HTMLInputElement).value;
-    // Map “All” to null, others to our existing tag values
     if (value === 'all') {
       setTag(null);
     } else {
-      setTag(value);
+      setTag(value); // 'audio' | 'furniture' | 'smart-home'
     }
     setPage(1);
   };
@@ -58,16 +56,16 @@ const CatalogFiltersSidebar = () => {
       elevation={0}
       sx={{
         p: 2.5,
-        // borderRadius: 4,
+        borderRadius: 0, // you removed radius globally; keep this square
         border: '1px solid',
         borderColor: 'divider',
         width: '100%',
-        maxWidth: { xs: '100%', md: 280 }, // desktop width close to reference
+        maxWidth: { xs: '100%', md: 280 },
         backgroundColor: 'background.paper',
         boxShadow: '0px 24px 60px rgba(15, 23, 42, 0.10)',
       }}
     >
-      {/* Header: icon + title */}
+      {/* Header */}
       <Box
         sx={{
           display: 'flex',
@@ -95,7 +93,7 @@ const CatalogFiltersSidebar = () => {
         </Typography>
       </Box>
 
-      {/* Availability section */}
+      {/* Availability */}
       <Box mb={2.5}>
         <Typography
           variant="subtitle2"
@@ -117,7 +115,7 @@ const CatalogFiltersSidebar = () => {
             }
             label={
               <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
-                In Stock
+                In Stock only
               </Typography>
             }
           />
@@ -137,13 +135,13 @@ const CatalogFiltersSidebar = () => {
 
       <Divider sx={{ mb: 2.5 }} />
 
-      {/* Price Range section – visual only for now */}
+      {/* Price Range – ZAR */}
       <Box mb={2.5}>
         <Typography
           variant="subtitle2"
           sx={{ fontSize: '0.8rem', fontWeight: 600, mb: 1 }}
         >
-          Price Range
+          Price Range (ZAR)
         </Typography>
         <Stack spacing={1.5}>
           <Box>
@@ -157,7 +155,7 @@ const CatalogFiltersSidebar = () => {
             <TextField
               size="small"
               fullWidth
-              placeholder="$0"
+              placeholder="R0"
               variant="outlined"
               InputProps={{ inputProps: { min: 0 } }}
             />
@@ -173,7 +171,7 @@ const CatalogFiltersSidebar = () => {
             <TextField
               size="small"
               fullWidth
-              placeholder="$1000"
+              placeholder="R1000"
               variant="outlined"
               InputProps={{ inputProps: { min: 0 } }}
             />
@@ -195,7 +193,7 @@ const CatalogFiltersSidebar = () => {
 
       <Divider sx={{ mb: 2.5 }} />
 
-      {/* Category section – this is wired to our tag filter */}
+      {/* Category (wired to tag filter) */}
       <Box mb={2.5}>
         <Typography
           variant="subtitle2"
@@ -251,7 +249,7 @@ const CatalogFiltersSidebar = () => {
 
       <Divider sx={{ mb: 2.5 }} />
 
-      {/* Tags section – visual chips like the design */}
+      {/* Tags – mostly visual */}
       <Box mb={2}>
         <Typography
           variant="subtitle2"
@@ -278,7 +276,7 @@ const CatalogFiltersSidebar = () => {
         </Stack>
       </Box>
 
-      {/* Clear filters row at the bottom */}
+      {/* Clear filters */}
       <Box mt={2}>
         <Typography
           variant="caption"
