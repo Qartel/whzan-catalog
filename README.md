@@ -1,3 +1,42 @@
+# Whzan Catalog Explorer
+
+A modern React + TypeScript catalog UI built for the Whzan Senior Frontend assignment.
+
+This project showcases:
+
+- A responsive, accessible catalog UI with **search, filters, sorting, pagination** and **favorites**
+- A **mock REST API** (Node + Express) backed by `products.json`
+- **React Query** for data fetching & caching
+- **Zustand** for client-side view + filter + favorites state
+- A consistent **MUI design system** with **light / dark mode** and a clean black/white/grey palette with green accents
+
+---
+
+## Tech Stack
+
+**Frontend**
+
+- [Vite](https://vitejs.dev/) + React + TypeScript
+- [Material UI (MUI)](https://mui.com/) for UI components & theming
+- [@tanstack/react-query](https://tanstack.com/query/latest) for data fetching/caching
+- [Zustand](https://github.com/pmndrs/zustand) for global state (filters, view mode, favorites)
+- React Router v6 for routing
+
+**Backend (mock)**
+
+- Node.js + Express
+- In-memory JSON data (`server-mock/data/products.json`)
+
+---
+
+# INSTALL INSTRUCTIONS:
+
+>>>>> npm i
+>>>>> npm run dev:server
+>>>>> npm run dev
+
+---
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
